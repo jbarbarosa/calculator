@@ -21,6 +21,15 @@ class CalcController {
         this.setLastNumberToDisplay()
     }
 
+    addDot() {
+       let lastOperation = this.getLastOperation()
+       if (this.isOperator(lastOperation) || !lastOperation) {
+           this.pushOperation('0.')
+       } else {
+           this.setLastOperation(lastOperation.toString() + '.')
+       }
+    }
+    
     addEventListenerAll(element, events, fn) {
 
         events.split(" ").forEach(event => {
@@ -56,18 +65,20 @@ class CalcController {
     }
     calc(){
         let last = ''
+        this._lastOperator = this.getLastItem()
+        if (this._operation.length < 3) {
+            let firstItem = this._operation[0]
+            this._operation = [firstItem, this._lastOperator, this._lastNumber]
+        }
         if (this._operation.length > 3) {
             last = this._operation.pop()
 
             this._lastNumber = this.getResult() 
 
-        }
-
-        if (this._operation.length == 3) {
+        } else if (this._operation.length == 3) {
             this._lastNumber = this.getLastItem(false)
         }
-        console.log('_lastOperator', this._lastOperator)
-        console.log('_lastNumber', this._lastNumber)
+
         let result = this.getResult() 
         if (last == '%') {
             result /= 100
@@ -87,6 +98,9 @@ class CalcController {
                 break
             }
         }
+        if (!lastItem) {
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber
+        }
         return lastItem
     }
     setLastNumberToDisplay(){
@@ -99,8 +113,6 @@ class CalcController {
         if (isNaN(this.getLastOperation())){
             if (this.isOperator(value)) {
                 this.setLastOperation(value)
-            } else if(isNaN(value)){
-                //console.log(value)
             } else {
                 this.pushOperation(value)
                 this.setLastNumberToDisplay()
@@ -112,7 +124,7 @@ class CalcController {
                 this.pushOperation(value)
             } else {
                 let newValue = this.getLastOperation().toString() + value.toString()
-                this.setLastOperation(parseInt(newValue))
+                this.setLastOperation(newValue)
                 this.setLastNumberToDisplay()
             }
 
@@ -123,6 +135,8 @@ class CalcController {
 
     clearAll(){
         this._operation = [0]
+        this._lastNumber = ''
+        this._lastOperator = ''
         this.setLastNumberToDisplay()
     }
     clearEntry(){
@@ -147,7 +161,7 @@ class CalcController {
                 this.addOperation('%') 
                 break
             case 'ponto':
-            this.addOperation('.')
+            this.addDot()
                 break
             case 'soma':
                 this.addOperation('+')
